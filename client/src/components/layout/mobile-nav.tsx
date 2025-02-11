@@ -68,16 +68,16 @@ export default function MobileNav() {
           </Link>
         ))}
 
-        {/* Center Logo */}
         <Link href="/">
-          <a className="flex flex-col items-center -mt-4">
+          <a className="flex flex-col items-center">
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="h-12 w-12 rounded-full bg-primary flex items-center justify-center shadow-lg"
+              className="relative"
             >
-              <Apple className="h-6 w-6 text-primary-foreground" />
+              <ShoppingBasket className="h-6 w-6 text-muted-foreground" />
             </motion.div>
+            <span className="text-xs font-medium text-muted-foreground">Home</span>
           </a>
         </Link>
 
