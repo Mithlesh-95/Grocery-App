@@ -22,6 +22,7 @@ const addItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
   quantity: z.number().min(0, "Quantity must be positive"),
   unit: z.string().min(1, "Unit is required"),
+  expiryDate: z.string().optional(),
 });
 
 export default function Inventory() {
@@ -30,6 +31,7 @@ export default function Inventory() {
     name: "",
     quantity: "",
     unit: "",
+    expiryDate: "",
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -45,7 +47,7 @@ export default function Inventory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/grocery-items"] });
       setIsAddingItem(false);
-      setNewItem({ name: "", quantity: "", unit: "" });
+      setNewItem({ name: "", quantity: "", unit: "", expiryDate: "" });
       toast({
         title: "Item added",
         description: "New item has been added to your inventory",
@@ -59,6 +61,7 @@ export default function Inventory() {
         name: newItem.name,
         quantity: parseInt(newItem.quantity),
         unit: newItem.unit,
+        expiryDate: newItem.expiryDate || undefined,
       });
       addMutation.mutate(parsedItem);
     } catch (error) {
@@ -122,6 +125,16 @@ export default function Inventory() {
                     setNewItem((prev) => ({ ...prev, unit: e.target.value }))
                   }
                   placeholder="e.g., liter"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <Input
+                  type="date"
+                  value={newItem.expiryDate}
+                  onChange={(e) =>
+                    setNewItem((prev) => ({ ...prev, expiryDate: e.target.value }))
+                  }
                 />
               </div>
               <Button

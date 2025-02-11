@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { type GroceryItem } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, AlertTriangle } from "lucide-react";
+import { differenceInDays, parseISO } from "date-fns";
 
 interface InventoryItemProps {
   item: GroceryItem;
@@ -24,20 +25,21 @@ interface InventoryItemProps {
 export default function InventoryItem({ item }: InventoryItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [quantity, setQuantity] = useState(item.quantity.toString());
+  const [expiryDate, setExpiryDate] = useState(
+    item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : ''
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: async (newQuantity: number) => {
-      await apiRequest("PATCH", `/api/grocery-items/${item.id}`, {
-        quantity: newQuantity,
-      });
+    mutationFn: async (updates: { quantity?: number; expiryDate?: string | null }) => {
+      await apiRequest("PATCH", `/api/grocery-items/${item.id}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/grocery-items"] });
       toast({
-        title: "Updated quantity",
-        description: `${item.name} quantity updated to ${quantity}`,
+        title: "Updated item",
+        description: `${item.name} has been updated`,
       });
       setIsEditing(false);
     },
@@ -66,8 +68,22 @@ export default function InventoryItem({ item }: InventoryItemProps) {
       });
       return;
     }
-    updateMutation.mutate(newQuantity);
+    updateMutation.mutate({
+      quantity: newQuantity,
+      expiryDate: expiryDate || null,
+    });
   };
+
+  const getDaysUntilExpiry = () => {
+    if (!item.expiryDate) return null;
+    const today = new Date();
+    const expiry = parseISO(item.expiryDate.toString());
+    return differenceInDays(expiry, today);
+  };
+
+  const daysUntilExpiry = getDaysUntilExpiry();
+  const isNearExpiry = daysUntilExpiry !== null && daysUntilExpiry <= 7;
+  const isExpired = daysUntilExpiry !== null && daysUntilExpiry <= 0;
 
   return (
     <motion.div
@@ -76,13 +92,23 @@ export default function InventoryItem({ item }: InventoryItemProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
     >
-      <Card className="p-4">
+      <Card className={`p-4 ${isExpired ? 'border-red-500' : isNearExpiry ? 'border-yellow-500' : ''}`}>
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <h3 className="font-medium">{item.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium">{item.name}</h3>
+              {isNearExpiry && (
+                <AlertTriangle className={`h-4 w-4 ${isExpired ? 'text-red-500' : 'text-yellow-500'}`} />
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               {item.quantity} {item.unit}
             </p>
+            {item.expiryDate && (
+              <p className={`text-xs ${isExpired ? 'text-red-500' : isNearExpiry ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                {isExpired ? 'Expired' : isNearExpiry ? `Expires in ${daysUntilExpiry} days` : `Expires: ${new Date(item.expiryDate).toLocaleDateString()}`}
+              </p>
+            )}
           </div>
           <div className="flex space-x-2">
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
@@ -93,7 +119,7 @@ export default function InventoryItem({ item }: InventoryItemProps) {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Update Quantity</DialogTitle>
+                  <DialogTitle>Update Item</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -102,6 +128,14 @@ export default function InventoryItem({ item }: InventoryItemProps) {
                       type="number"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Expiry Date</Label>
+                    <Input
+                      type="date"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
                     />
                   </div>
                   <Button
