@@ -75,9 +75,30 @@ export default function MobileNav() {
               whileTap={{ scale: 0.95 }}
               className="relative"
             >
-              <Apple className="h-6 w-6 text-muted-foreground" />
+              <Apple 
+                className={
+                  location === "/"
+                    ? "h-6 w-6 text-primary"
+                    : "h-6 w-6 text-muted-foreground"
+                }
+              />
+              {location === "/" && (
+                <motion.div
+                  className="absolute -bottom-2 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary"
+                  layoutId="mobile-nav-indicator"
+                  transition={{ type: "spring", bounce: 0.25 }}
+                />
+              )}
             </motion.div>
-            <span className="text-xs font-medium text-muted-foreground">Home</span>
+            <span 
+              className={
+                location === "/"
+                  ? "text-xs font-medium text-primary"
+                  : "text-xs font-medium text-muted-foreground"
+              }
+            >
+              Home
+            </span>
           </a>
         </Link>
 
