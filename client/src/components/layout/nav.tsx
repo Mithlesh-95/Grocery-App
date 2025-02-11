@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ShoppingBasket, Refrigerator, Book } from "lucide-react";
+import { ShoppingBasket, Refrigerator, Book, Apple } from "lucide-react";
 
 const links = [
   { name: "Inventory", href: "/inventory", icon: Refrigerator },
@@ -9,26 +9,56 @@ const links = [
   { name: "Shopping List", href: "/shopping", icon: ShoppingBasket },
 ];
 
+const navVariants = {
+  hidden: { y: -20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20
+    }
+  }
+};
+
 export default function Nav() {
   const [location] = useLocation();
 
   return (
-    <nav className="fixed top-0 z-50 hidden w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:block">
+    <motion.nav
+      variants={navVariants}
+      initial="hidden"
+      animate="visible" 
+      className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:block"
+    >
       <div className="container flex h-16 items-center">
-        <div className="mr-8 flex items-center space-x-2">
-          <ShoppingBasket className="h-6 w-6" />
-          <span className="text-lg font-bold">GroceryAI</span>
-        </div>
+        <Link href="/">
+          <a className="mr-8 flex items-center space-x-2">
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Apple className="h-6 w-6 text-primary" />
+            </motion.div>
+            <span className="text-lg font-bold">GroceryAI</span>
+          </a>
+        </Link>
         <div className="flex space-x-4">
           {links.map(({ name, href, icon: Icon }) => (
             <Link key={href} href={href}>
               <a
                 className={cn(
-                  "relative flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors hover:text-primary",
+                  "group relative flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors hover:text-primary",
                   location === href ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <Icon className="h-4 w-4" />
+                </motion.div>
                 <span>{name}</span>
                 {location === href && (
                   <motion.div
@@ -42,6 +72,6 @@ export default function Nav() {
           ))}
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 }
