@@ -75,7 +75,7 @@ export default function MobileNav() {
               whileTap={{ scale: 0.95 }}
               className="relative"
             >
-              <ShoppingBasket className="h-6 w-6 text-muted-foreground" />
+              <Apple className="h-6 w-6 text-muted-foreground" />
             </motion.div>
             <span className="text-xs font-medium text-muted-foreground">Home</span>
           </a>
