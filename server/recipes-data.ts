@@ -21,7 +21,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add cream and simmer for 10 more minutes",
       "Garnish with butter and cream"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398",
+    imageUrl: "https://plus.unsplash.com/premium_photo-1672876797137-9d46d5da7686?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=a03U45jFxOI",
     preparationTime: 60
   },
@@ -44,7 +44,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add grilled paneer to the gravy",
       "Finish with cream"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7",
+    imageUrl: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=_BXB2g7r4Ho",
     preparationTime: 45
   },
@@ -69,7 +69,7 @@ export const indianRecipes: InsertRecipe[] = [
       "For bhature: Mix ingredients and knead dough, let rest for 1 hour, roll and fry",
       "Serve chickpeas with fresh bhature"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1604974632187-8a5d53d3a760",
+    imageUrl: "https://images.unsplash.com/photo-1505253758473-96b7015fcd40?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=q8q4Jhv0xjY",
     preparationTime: 90
   },
@@ -93,7 +93,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add cooked lentils to the pan and simmer for 5 minutes",
       "Garnish with fresh coriander leaves"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1587428351842-119d03719d2b",
+    imageUrl: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=QppBTeEMcPY",
     preparationTime: 30
   },
@@ -117,7 +117,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add a little water, cover, and cook until vegetables are tender",
       "Garnish with coriander leaves"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1615974748067-4d9891d7c940",
+    imageUrl: "https://images.unsplash.com/photo-1516714435131-44d6b64dc6a2?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=jfwEz6u4gFY",
     preparationTime: 40
   }
