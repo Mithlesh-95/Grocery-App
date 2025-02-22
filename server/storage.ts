@@ -44,26 +44,8 @@ export class MemStorage implements IStorage {
   }
 
   private initializeSampleData() {
-    const sampleRecipes: InsertRecipe[] = [
-      {
-        name: "Classic Pancakes",
-        description: "Fluffy homemade pancakes perfect for breakfast",
-        ingredients: ["2 cups flour", "2 eggs", "1 cup milk", "2 tbsp sugar"],
-        instructions: ["Mix dry ingredients", "Add wet ingredients", "Cook on griddle"],
-        imageUrl: "https://images.unsplash.com/photo-1601315379734-425a469078de",
-        videoUrl: "https://youtube.com/watch?v=123",
-        preparationTime: 20,
-      },
-      {
-        name: "Garden Salad",
-        description: "Fresh and healthy garden salad",
-        ingredients: ["lettuce", "tomatoes", "cucumber", "olive oil"],
-        instructions: ["Wash vegetables", "Chop ingredients", "Mix and serve"],
-        imageUrl: "https://images.unsplash.com/photo-1512058454905-6b841e7ad132",
-        videoUrl: "https://youtube.com/watch?v=456",
-        preparationTime: 10,
-      },
-    ];
+    const { indianRecipes } = require('./recipes-data');
+    const sampleRecipes: InsertRecipe[] = indianRecipes;
 
     sampleRecipes.forEach(recipe => this.createRecipe(recipe));
   }
