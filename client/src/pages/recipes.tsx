@@ -23,6 +23,8 @@ export default function Recipes() {
     staleTime: 30000,
   });
 
+  import React from 'react';
+
   const filteredRecipes = React.useMemo(() => {
     return recipes.filter((recipe) => {
       if (!search.trim()) return true;
