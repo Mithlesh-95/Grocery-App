@@ -21,9 +21,16 @@ export default function Recipes() {
     queryKey: ["/api/recipes"],
   });
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredRecipes = recipes.filter((recipe) => {
+    const searchTerm = search.toLowerCase();
+    return (
+      recipe.name.toLowerCase().includes(searchTerm) ||
+      recipe.description.toLowerCase().includes(searchTerm) ||
+      recipe.ingredients.some(ingredient => 
+        ingredient.toLowerCase().includes(searchTerm)
+      )
+    );
+  });
 
   return (
     <div className="space-y-8">
