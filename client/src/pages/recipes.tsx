@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import React from 'react';
 
 export default function Recipes() {
   const [search, setSearch] = useState("");
@@ -22,8 +23,6 @@ export default function Recipes() {
     refetchOnWindowFocus: false,
     staleTime: 30000,
   });
-
-  import React from 'react';
 
   const filteredRecipes = React.useMemo(() => {
     return recipes.filter((recipe) => {
@@ -94,33 +93,7 @@ export default function Recipes() {
                   </div>
                   <div>
                     <h3 className="font-medium">Ingredients</h3>
-                    <ul className="list-inside list-disc text-muted-foreground">
-                      {recipe.ingredients.map((ingredient, i) => (
-                        <li key={i}>{ingredient}</li>
-                      ))}
-                    </ul>
                   </div>
-                  <div>
-                    <h3 className="font-medium">Instructions</h3>
-                    <ol className="list-inside list-decimal text-muted-foreground">
-                      {recipe.instructions.map((instruction, i) => (
-                        <li key={i}>{instruction}</li>
-                      ))}
-                    </ol>
-                  </div>
-                  {recipe.videoUrl && (
-                    <div>
-                      <h3 className="font-medium">Video Tutorial</h3>
-                      <a
-                        href={recipe.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        Watch on YouTube
-                      </a>
-                    </div>
-                  )}
                 </div>
               </DialogContent>
             </Dialog>
