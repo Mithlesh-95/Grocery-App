@@ -21,7 +21,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add cream and simmer for 10 more minutes",
       "Garnish with butter and cream"
     ],
-    imageUrl: "https://plus.unsplash.com/premium_photo-1672876797137-9d46d5da7686?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=a03U45jFxOI",
     preparationTime: 60
   },
@@ -44,7 +44,7 @@ export const indianRecipes: InsertRecipe[] = [
       "Add grilled paneer to the gravy",
       "Finish with cream"
     ],
-    imageUrl: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&auto=format&fit=crop",
     videoUrl: "https://www.youtube.com/watch?v=_BXB2g7r4Ho",
     preparationTime: 45
   },
