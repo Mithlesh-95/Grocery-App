@@ -19,18 +19,23 @@ export default function Recipes() {
 
   const { data: recipes = [], isLoading } = useQuery<Recipe[]>({
     queryKey: ["/api/recipes"],
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
   });
 
-  const filteredRecipes = recipes.filter((recipe) => {
-    const searchTerm = search.toLowerCase();
-    return (
-      recipe.name.toLowerCase().includes(searchTerm) ||
-      recipe.description.toLowerCase().includes(searchTerm) ||
-      recipe.ingredients.some(ingredient => 
-        ingredient.toLowerCase().includes(searchTerm)
-      )
-    );
-  });
+  const filteredRecipes = React.useMemo(() => {
+    return recipes.filter((recipe) => {
+      if (!search.trim()) return true;
+      const searchTerm = search.toLowerCase().trim();
+      return (
+        recipe.name.toLowerCase().includes(searchTerm) ||
+        recipe.description.toLowerCase().includes(searchTerm) ||
+        recipe.ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(searchTerm)
+        )
+      );
+    });
+  }, [recipes, search]);
 
   return (
     <div className="space-y-8">
