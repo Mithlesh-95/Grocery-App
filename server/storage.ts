@@ -44,7 +44,7 @@ export class MemStorage implements IStorage {
   }
 
   private initializeSampleData() {
-    const { indianRecipes } = require('./recipes-data');
+    const { indianRecipes } = await import('./recipes-data.js');
     const sampleRecipes: InsertRecipe[] = indianRecipes;
 
     sampleRecipes.forEach(recipe => this.createRecipe(recipe));
