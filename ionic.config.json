@@ -1,0 +1,7 @@
+{
+    "name": "GroceryAI",
+    "integrations": {
+      "capacitor": {}
+    },
+    "type": "react"
+  }

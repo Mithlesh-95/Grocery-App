@@ -8,19 +8,16 @@ import {
 } from "@shared/schema";
 
 export interface IStorage {
-  // Grocery Items
   getGroceryItems(): Promise<GroceryItem[]>;
   getGroceryItem(id: number): Promise<GroceryItem | undefined>;
   createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
   updateGroceryItem(id: number, item: Partial<InsertGroceryItem>): Promise<GroceryItem | undefined>;
   deleteGroceryItem(id: number): Promise<void>;
 
-  // Recipes
   getRecipes(): Promise<Recipe[]>;
   getRecipe(id: number): Promise<Recipe | undefined>;
   createRecipe(recipe: InsertRecipe): Promise<Recipe>;
-  
-  // Shopping List
+
   getShoppingList(): Promise<ShoppingItem[]>;
   createShoppingItem(item: InsertShoppingItem): Promise<ShoppingItem>;
   updateShoppingItem(id: number, item: Partial<InsertShoppingItem>): Promise<ShoppingItem | undefined>;
@@ -31,23 +28,24 @@ export class MemStorage implements IStorage {
   private groceryItems: Map<number, GroceryItem>;
   private recipes: Map<number, Recipe>;
   private shoppingItems: Map<number, ShoppingItem>;
-  private currentIds: { [key: string]: number };
+  private currentIds: { groceryItems: number; recipes: number; shoppingItems: number };
 
   constructor() {
     this.groceryItems = new Map();
     this.recipes = new Map();
     this.shoppingItems = new Map();
     this.currentIds = { groceryItems: 1, recipes: 1, shoppingItems: 1 };
-    
-    // Add some sample recipes
+
     this.initializeSampleData();
   }
 
   private async initializeSampleData() {
-    const { indianRecipes } = await import('./recipes-data.js');
+    const { indianRecipes } = await import("./recipes-data.js");
     const sampleRecipes: InsertRecipe[] = indianRecipes;
 
-    sampleRecipes.forEach(recipe => this.createRecipe(recipe));
+    for (const recipe of sampleRecipes) {
+      await this.createRecipe(recipe);
+    }
   }
 
   // Grocery Items
@@ -61,7 +59,13 @@ export class MemStorage implements IStorage {
 
   async createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem> {
     const id = this.currentIds.groceryItems++;
-    const newItem = { ...item, id };
+    const newItem: GroceryItem = {
+      ...item,
+      id,
+      notificationSent: false, // Explicitly set default
+      lowStockThreshold: item.lowStockThreshold ?? null,
+      notes: item.notes ?? null,
+    };
     this.groceryItems.set(id, newItem);
     return newItem;
   }
@@ -69,8 +73,12 @@ export class MemStorage implements IStorage {
   async updateGroceryItem(id: number, item: Partial<InsertGroceryItem>): Promise<GroceryItem | undefined> {
     const existingItem = this.groceryItems.get(id);
     if (!existingItem) return undefined;
-    
-    const updatedItem = { ...existingItem, ...item };
+
+    const updatedItem: GroceryItem = {
+      ...existingItem,
+      ...item,
+      notificationSent: existingItem.notificationSent, // Preserve unless explicitly updated
+    };
     this.groceryItems.set(id, updatedItem);
     return updatedItem;
   }
@@ -90,7 +98,7 @@ export class MemStorage implements IStorage {
 
   async createRecipe(recipe: InsertRecipe): Promise<Recipe> {
     const id = this.currentIds.recipes++;
-    const newRecipe = { ...recipe, id };
+    const newRecipe: Recipe = { ...recipe, id };
     this.recipes.set(id, newRecipe);
     return newRecipe;
   }
@@ -102,7 +110,7 @@ export class MemStorage implements IStorage {
 
   async createShoppingItem(item: InsertShoppingItem): Promise<ShoppingItem> {
     const id = this.currentIds.shoppingItems++;
-    const newItem = { ...item, id };
+    const newItem: ShoppingItem = { ...item, id };
     this.shoppingItems.set(id, newItem);
     return newItem;
   }
@@ -110,8 +118,8 @@ export class MemStorage implements IStorage {
   async updateShoppingItem(id: number, item: Partial<InsertShoppingItem>): Promise<ShoppingItem | undefined> {
     const existingItem = this.shoppingItems.get(id);
     if (!existingItem) return undefined;
-    
-    const updatedItem = { ...existingItem, ...item };
+
+    const updatedItem: ShoppingItem = { ...existingItem, ...item };
     this.shoppingItems.set(id, updatedItem);
     return updatedItem;
   }

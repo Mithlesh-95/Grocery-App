@@ -12,11 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { type GroceryItem } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Edit2, Trash2, AlertTriangle } from "lucide-react";
-import { differenceInDays, parseISO } from "date-fns";
+import { differenceInDays, parseISO, startOfDay } from "date-fns";
+import { type GroceryItem } from "@shared/schema";
 
 interface InventoryItemProps {
   item: GroceryItem;
@@ -26,7 +26,7 @@ export default function InventoryItem({ item }: InventoryItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [quantity, setQuantity] = useState(item.quantity.toString());
   const [expiryDate, setExpiryDate] = useState(
-    item.expiryDate ? new Date(item.expiryDate).toISOString().split('T')[0] : ''
+    item.expiryDate ? new Date(item.expiryDate).toISOString().split("T")[0] : ""
   );
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -76,14 +76,14 @@ export default function InventoryItem({ item }: InventoryItemProps) {
 
   const getDaysUntilExpiry = () => {
     if (!item.expiryDate) return null;
-    const today = new Date();
-    const expiry = parseISO(item.expiryDate.toString());
-    return differenceInDays(expiry, today);
+    const today = startOfDay(new Date()); // Start of today, ignoring time
+    const expiry = startOfDay(parseISO(item.expiryDate.toString())); // Start of expiry day
+    return differenceInDays(expiry, today); // Positive if expiry is in future
   };
 
   const daysUntilExpiry = getDaysUntilExpiry();
-  const isNearExpiry = daysUntilExpiry !== null && daysUntilExpiry <= 7;
-  const isExpired = daysUntilExpiry !== null && daysUntilExpiry <= 0;
+  const isNearExpiry = daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 7; // Only future dates
+  const isExpired = daysUntilExpiry !== null && daysUntilExpiry < 0; // Only past dates
 
   return (
     <motion.div
@@ -92,21 +92,36 @@ export default function InventoryItem({ item }: InventoryItemProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
     >
-      <Card className={`p-4 ${isExpired ? 'border-red-500' : isNearExpiry ? 'border-yellow-500' : ''}`}>
+      <Card className={`p-4 ${isExpired ? "border-red-500" : isNearExpiry ? "border-yellow-500" : ""}`}>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-medium">{item.name}</h3>
               {isNearExpiry && (
-                <AlertTriangle className={`h-4 w-4 ${isExpired ? 'text-red-500' : 'text-yellow-500'}`} />
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              )}
+              {isExpired && (
+                <AlertTriangle className="h-4 w-4 text-red-500" />
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {item.quantity} {item.unit}
+              {item.quantity}{item.unit ? ` ${item.unit}` : ''}
             </p>
             {item.expiryDate && (
-              <p className={`text-xs ${isExpired ? 'text-red-500' : isNearExpiry ? 'text-yellow-500' : 'text-muted-foreground'}`}>
-                {isExpired ? 'Expired' : isNearExpiry ? `Expires in ${daysUntilExpiry} days` : `Expires: ${new Date(item.expiryDate).toLocaleDateString()}`}
+              <p
+                className={`text-xs ${
+                  isExpired
+                    ? "text-red-500"
+                    : isNearExpiry
+                    ? "text-yellow-500"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {isExpired
+                  ? "Expired"
+                  : isNearExpiry
+                  ? `Expires in ${daysUntilExpiry} days`
+                  : `Expires: ${new Date(item.expiryDate).toLocaleDateString()}`}
               </p>
             )}
           </div>

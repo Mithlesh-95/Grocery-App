@@ -8,6 +8,7 @@ import MobileNav from "@/components/layout/mobile-nav";
 import Inventory from "@/pages/inventory";
 import Recipes from "@/pages/recipes";
 import Shopping from "@/pages/shopping";
+import Stores from "@/pages/stores";
 import { AnimatePresence } from "framer-motion";
 import GroceryLoader from "@/components/grocery-loader";
 import { useEffect, useState } from "react";
@@ -20,6 +21,7 @@ function Router() {
         <Route path="/inventory" component={Inventory} />
         <Route path="/recipes" component={Recipes} />
         <Route path="/shopping" component={Shopping} />
+        <Route path="/stores" component={Stores} />
         <Route component={NotFound} />
       </Switch>
     </AnimatePresence>

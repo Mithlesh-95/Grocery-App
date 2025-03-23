@@ -1,57 +1,89 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
-
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
-}
-
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+// @/lib/queryClient.ts
+import { QueryClient } from "@tanstack/react-query";
+import * as mockApi from "./mockApi";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
-    },
-    mutations: {
-      retry: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
     },
   },
 });
+
+export async function apiRequest(
+  method: string,
+  path: string,
+  body?: any
+): Promise<any> {
+  // Mock API implementation
+  if (path === "/api/shopping-list") {
+    if (method === "GET") {
+      return {
+        ok: true,
+        data: await mockApi.getShoppingList(),
+      };
+    }
+    if (method === "POST") {
+      return {
+        ok: true,
+        data: await mockApi.addShoppingItem(body),
+      };
+    }
+  }
+
+  if (path.startsWith("/api/shopping-list/") && method === "PATCH") {
+    const id = parseInt(path.split("/").pop()!, 10);
+    return {
+      ok: true,
+      data: await mockApi.updateShoppingItem(id, body),
+    };
+  }
+
+  if (path.startsWith("/api/shopping-list/") && method === "DELETE") {
+    const id = parseInt(path.split("/").pop()!, 10);
+    await mockApi.deleteShoppingItem(id);
+    return {
+      ok: true,
+      data: null,
+    };
+  }
+
+  // Handle /api/grocery-items
+  if (path === "/api/grocery-items") {
+    if (method === "GET") {
+      return {
+        ok: true,
+        data: await mockApi.getGroceryItems(),
+      };
+    }
+    if (method === "POST") {
+      return {
+        ok: true,
+        data: await mockApi.addGroceryItem(body),
+      };
+    }
+  }
+  
+  // Handle PATCH and DELETE for grocery items
+  if (path.startsWith("/api/grocery-items/")) {
+    const id = parseInt(path.split("/").pop()!, 10);
+    
+    if (method === "PATCH") {
+      return {
+        ok: true,
+        data: await mockApi.updateGroceryItem(id, body),
+      };
+    }
+    
+    if (method === "DELETE") {
+      await mockApi.deleteGroceryItem(id);
+      return {
+        ok: true,
+        data: null,
+      };
+    }
+  }
+
+  throw new Error(`Unhandled request: ${method} ${path}`);
+}

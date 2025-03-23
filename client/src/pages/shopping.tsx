@@ -1,218 +1,141 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Plus, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
+import React, { useState } from "react";
+import { ShoppingBag } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import type { ShoppingItem, InsertShoppingItem } from "@shared/schema";
-import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
 
-const addItemSchema = z.object({
-  itemName: z.string().min(1, "Item name is required"),
-  quantity: z.number().min(0, "Quantity must be positive"),
-  unit: z.string().min(1, "Unit is required"),
-});
+const GROCERY_APPS = [
+  {
+    id: "zepto",
+    name: "Zepto",
+    icon: ShoppingBag,
+    url: "https://www.zeptonow.com/",
+    backgroundColor: "bg-orange-100",
+    appStore: "https://apps.apple.com/in/app/zepto/id1575423441",
+    playStore: "https://play.google.com/store/apps/details?id=com.zeptoconsumerapp",
+  },
+  {
+    id: "bigbasket",
+    name: "BigBasket",
+    icon: ShoppingBag,
+    url: "https://www.bigbasket.com/",
+    backgroundColor: "bg-green-100",
+    appStore: "https://apps.apple.com/in/app/bigbasket/id660806884",
+    playStore: "https://play.google.com/store/apps/details?id=com.bigbasket",
+  },
+  {
+    id: "dmart",
+    name: "DMart Ready",
+    icon: ShoppingBag,
+    url: "https://www.dmart.in/",
+    backgroundColor: "bg-red-100",
+    appStore: "https://apps.apple.com/in/app/dmart-ready-online-grocery/id1442337588",
+    playStore: "https://play.google.com/store/apps/details?id=com.avenues.dmart",
+  },
+  {
+    id: "swiggy-instamart",
+    name: "Swiggy Instamart",
+    icon: ShoppingBag,
+    url: "https://www.swiggy.com/instamart",
+    backgroundColor: "bg-yellow-100",
+    appStore: "https://apps.apple.com/in/app/swiggy-food-grocery-delivery/id989540920",
+    playStore: "https://play.google.com/store/apps/details?id=in.swiggy.android",
+  },
+  {
+    id: "blinkit",
+    name: "Blinkit",
+    icon: ShoppingBag,
+    url: "https://blinkit.com/",
+    backgroundColor: "bg-purple-100",
+    appStore: "https://apps.apple.com/in/app/blinkit-grocery-in-10-mins/id1493067167",
+    playStore: "https://play.google.com/store/apps/details?id=com.grofers.customerapp",
+  },
+  {
+    id: "bb-now",
+    name: "BB Now",
+    icon: ShoppingBag,
+    url: "https://www.bigbasket.com/bbnow/",
+    backgroundColor: "bg-blue-100",
+    appStore: "https://apps.apple.com/in/app/bigbasket/id660806884",
+    playStore: "https://play.google.com/store/apps/details?id=com.bigbasket",
+  },
+];
 
-export default function Shopping() {
-  const [isAddingItem, setIsAddingItem] = useState(false);
-  const [newItem, setNewItem] = useState({
-    itemName: "",
-    quantity: "",
-    unit: "",
-  });
+export default function GroceryApps() {
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: items = [], isLoading } = useQuery<ShoppingItem[]>({
-    queryKey: ["/api/shopping-list"],
-  });
-
-  const addMutation = useMutation({
-    mutationFn: async (item: InsertShoppingItem) => {
-      await apiRequest("POST", "/api/shopping-list", item);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
-      setIsAddingItem(false);
-      setNewItem({ itemName: "", quantity: "", unit: "" });
-      toast({
-        title: "Item added",
-        description: "New item has been added to your shopping list",
-      });
-    },
-  });
-
-  const toggleMutation = useMutation({
-    mutationFn: async ({
-      id,
-      isPurchased,
-    }: {
-      id: number;
-      isPurchased: boolean;
-    }) => {
-      await apiRequest("PATCH", `/api/shopping-list/${id}`, { isPurchased });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-list"] });
-    },
-  });
-
-  const handleAddItem = () => {
+  const handleAppClick = (app: typeof GROCERY_APPS[0]) => {
     try {
-      const parsedItem = addItemSchema.parse({
-        itemName: newItem.itemName,
-        quantity: parseInt(newItem.quantity),
-        unit: newItem.unit,
-      });
-      addMutation.mutate(parsedItem);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Invalid input",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
+      if (isMobile) {
+        const deepLink = app.url;
+        window.location.href = deepLink;
+        
+        setTimeout(() => {
+          const storeUrl = /iOS|iPhone|iPad/.test(navigator.userAgent)
+            ? app.appStore
+            : app.playStore;
+          window.location.href = storeUrl;
+        }, 1000);
+      } else {
+        window.open(app.url, "_blank");
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to open the app",
+        variant: "destructive",
+      });
     }
   };
 
-  const toggleItem = (item: ShoppingItem) => {
-    toggleMutation.mutate({
-      id: item.id,
-      isPurchased: !item.isPurchased,
-    });
-  };
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-  const sortedItems = [...items].sort((a, b) => {
-    if (a.isPurchased === b.isPurchased) {
-      return 0;
-    }
-    return a.isPurchased ? 1 : -1;
-  });
+    let timeoutId: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+
+    window.addEventListener("resize", debouncedResize);
+    return () => window.removeEventListener("resize", debouncedResize);
+  }, []);
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Shopping List</h1>
-          <p className="text-muted-foreground">
-            Keep track of items you need to buy
-          </p>
-        </div>
-        <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Item
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Shopping Item</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Item Name</Label>
-                <Input
-                  value={newItem.itemName}
-                  onChange={(e) =>
-                    setNewItem((prev) => ({ ...prev, itemName: e.target.value }))
-                  }
-                  placeholder="e.g., Bread"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Quantity</Label>
-                <Input
-                  type="number"
-                  value={newItem.quantity}
-                  onChange={(e) =>
-                    setNewItem((prev) => ({ ...prev, quantity: e.target.value }))
-                  }
-                  placeholder="e.g., 2"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Unit</Label>
-                <Input
-                  value={newItem.unit}
-                  onChange={(e) =>
-                    setNewItem((prev) => ({ ...prev, unit: e.target.value }))
-                  }
-                  placeholder="e.g., loaves"
-                />
-              </div>
-              <Button
-                onClick={handleAddItem}
-                disabled={addMutation.isPending}
-                className="w-full"
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto py-8">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Grocery Shopping Apps
+        </h1>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+          {GROCERY_APPS.map((app) => {
+            const Icon = app.icon;
+            return (
+              <Card
+                key={app.id}
+                className="group p-4 hover:shadow-md transition-all duration-200 cursor-pointer border-none"
+                onClick={() => handleAppClick(app)}
               >
-                Add Item
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {isLoading ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-16 rounded-lg bg-muted animate-pulse"
-            ></div>
-          ))}
-        </div>
-      ) : (
-        <motion.div layout className="space-y-4">
-          <AnimatePresence>
-            {sortedItems.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <Card>
-                  <div className="flex items-center p-4">
-                    <Checkbox
-                      checked={item.isPurchased}
-                      onCheckedChange={() => toggleItem(item)}
-                      className="mr-4"
-                    />
-                    <div
-                      className={`flex-1 ${
-                        item.isPurchased ? "text-muted-foreground line-through" : ""
-                      }`}
-                    >
-                      <h3 className="font-medium">{item.itemName}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {item.quantity} {item.unit}
-                      </p>
-                    </div>
-                    {item.isPurchased && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
+                <div className="flex flex-col items-center gap-3">
+                  <div
+                    className={`${app.backgroundColor} p-3 rounded-full group-hover:scale-110 transition-transform`}
+                  >
+                    <Icon className="h-6 w-6 text-gray-700" />
                   </div>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      )}
+                  <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
+                    {app.name}
+                  </span>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

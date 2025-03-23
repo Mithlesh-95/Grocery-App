@@ -14,8 +14,15 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/grocery-items", async (req, res) => {
     try {
       const item = insertGroceryItemSchema.parse(req.body);
+      const existingItems = await storage.getGroceryItems();
+      const duplicate = existingItems.find(
+        (i) => i.name === item.name && i.expiryDate?.getTime() === item.expiryDate?.getTime()
+      );
+      if (duplicate) {
+        return res.status(409).json({ error: "Item with same name and expiry date already exists" });
+      }
       const newItem = await storage.createGroceryItem(item);
-      res.json(newItem);
+      res.status(201).json(newItem);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });
@@ -76,7 +83,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const item = insertShoppingItemSchema.parse(req.body);
       const newItem = await storage.createShoppingItem(item);
-      res.json(newItem);
+      res.status(201).json(newItem);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ error: error.errors });

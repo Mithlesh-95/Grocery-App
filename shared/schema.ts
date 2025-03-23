@@ -6,7 +6,7 @@ export const groceryItems = pgTable("grocery_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   quantity: integer("quantity").notNull().default(0),
-  unit: text("unit").notNull(),
+  unit: text("unit").default(""),
   expiryDate: timestamp("expiry_date"),
   lowStockThreshold: integer("low_stock_threshold"),
   notificationSent: boolean("notification_sent").default(false),
@@ -22,6 +22,8 @@ export const recipes = pgTable("recipes", {
   imageUrl: text("image_url"),
   videoUrl: text("video_url"),
   preparationTime: integer("preparation_time"),
+  usedIngredientCount: integer("used_ingredient_count").default(0),
+  missedIngredientCount: integer("missed_ingredient_count").default(0),
 });
 
 export const shoppingList = pgTable("shopping_list", {
@@ -43,7 +45,14 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({ id: true })
 export const insertShoppingItemSchema = createInsertSchema(shoppingList).omit({ id: true });
 
 export type GroceryItem = typeof groceryItems.$inferSelect;
-export type Recipe = typeof recipes.$inferSelect;
+export type Recipe = typeof recipes.$inferSelect & {
+  shareUrl?: string;
+  // For recipe suggestions based on inventory
+  usedIngredientCount?: number;
+  missedIngredientCount?: number;
+  // Array of missing ingredients
+  missedIngredients?: string[];
+};
 export type ShoppingItem = typeof shoppingList.$inferSelect;
 
 export type InsertGroceryItem = z.infer<typeof insertGroceryItemSchema>;

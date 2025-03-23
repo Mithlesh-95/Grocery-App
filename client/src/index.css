@@ -11,3 +11,10 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+.aspect-video {
+  width: 100%; /* Ensure the container has a width */
+  min-height: 0; /* Allow height to be determined by aspect ratio */
+}
+
+
